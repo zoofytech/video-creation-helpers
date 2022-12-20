@@ -1,10 +1,10 @@
 # multi-video-upload
 Code that helps upload videos to TikTok Instagram and YouTube
-
+If the video duration is long, it will automatically split the video into multiple videos and upload them all
 # Requirements  
 1. ffmpeg - https://ffmpeg.org/download.html 
 2. requirements.txt - `pip install -r requirements.txt `
-3. To use the YouTube API to upload a video, you will need to obtain a client secret file that contains the necessary authentication information. Here are the steps to obtain a client secret file:
+3. YouTube Client Secret - To use the YouTube API to upload a video, you will need to obtain a client secret file that contains the necessary authentication information. Here are the steps to obtain a client secret file:
 
     1. Go to the Google Cloud Console (https://console.cloud.google.com/).
     1. Click the "Select a project" dropdown menu and create a new project or 1. select an existing project.
@@ -17,7 +17,7 @@ Code that helps upload videos to TikTok Instagram and YouTube
     1. Enter a name for the client and specify the authorized redirect URIs.
     1. Click the "Create" button to create the client ID.
     1. Click the "Download JSON" button to download the client secret file.
-    
+
 ## Usage
 
 To use this script, you can simply run it from the command line with the following arguments:
