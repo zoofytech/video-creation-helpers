@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 from pydub import AudioSegment
 from moviepy.editor import VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip
