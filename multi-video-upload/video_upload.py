@@ -28,12 +28,13 @@ def main():
     # Check the video duration
     video_duration = get_video_duration(video_file_path)
 
-    # Split the video into multiple videos if necessary
+    # Split the video into multiple videos if necessary for Instagram and TikTok
     if video_duration > MAX_VIDEO_DURATION:
-        split_video(video_file_path)
-
-    # Upload the video to YouTube
-    youtube_upload(video_file_path, client_secret_file, scopes, api_service_name, api_version)
+        split_video(video_file_path, MAX_VIDEO_DURATION)
+    
+    # Upload the video to YouTube if it's not split
+    if video_duration <= MAX_VIDEO_DURATION:
+        youtube_upload(video_file_path, client_secret_file, scopes, api_service_name, api_version, video_title, video_description)
 
     # Upload the video to Instagram
     instagram_upload(video_file_path, instagram_username, instagram_password)
@@ -54,18 +55,16 @@ def get_video_duration(video_file_path):
             break
     return duration
 
-def split_video(video_file_path):
+def split_video(video_file_path, max_duration):
     # Use ffmpeg to split the video into multiple videos
     video_duration = get_video_duration(video_file_path)
-    MAX_VIDEO_DURATION = 10
-    num_videos = int(video_duration / MAX_VIDEO_DURATION) + 1
+    num_videos = int(video_duration / max_duration) + 1
     for i in range(num_videos):
-        start_time = i * MAX_VIDEO_DURATION
-        end_time = start_time + MAX_VIDEO_DURATION
+        start_time = i * max_duration
+        end_time = start_time + max_duration
         out_file = f'{video_file_path}_part_{i}.mp4'
-        command = ['ffmpeg', '-i', video_file_path, '-ss', start_time, '-to', end_time, '-c', 'copy', out_file]
+        command = ['ffmpeg', '-i', video_file_path, '-ss', str(start_time), '-to', str(end_time), '-c', 'copy', out_file]
         subprocess.run(command)
-    pass
 
 def youtube_upload(video_file_path, client_secret_file, scopes, api_service_name, api_version, video_title, video_description):
     # Load the client secrets file
@@ -82,7 +81,7 @@ def youtube_upload(video_file_path, client_secret_file, scopes, api_service_name
         'snippet': {
             'title': video_title,
             'description': video_description,
-            'tags': ['video', 'upload', 'test'],
+            'tags': get_tags(video_file_path),  # Get tags from video or input file
             'categoryId': 28
         },
         'status': {
@@ -101,6 +100,14 @@ def youtube_upload(video_file_path, client_secret_file, scopes, api_service_name
             print(f'Uploaded {int(status.progress() * video_size)} bytes')
     print(f'Video uploaded: {response["id"]}')
 
+def get_tags(video_file_path):
+    # Implement logic to extract tags from the video or an input file (e.g., tags.txt)
+    # Example: Read tags from a file called tags.txt, one tag per line
+    tags = []
+    if os.path.exists("tags.txt"):
+        with open("tags.txt", "r") as tag_file:
+            tags = [line.strip() for line in tag_file.readlines()]
+    return tags
 
 def instagram_upload(video_file_path, instagram_username, instagram_password):
     # Create an Instagram API client
@@ -122,5 +129,3 @@ def tiktok_upload(video_file_path, tiktok_username, tiktok_password):
 
 if __name__ == '__main__':
     main()
-
-
