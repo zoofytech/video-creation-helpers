@@ -1,29 +1,61 @@
-# multi-video-upload
-Code that helps upload videos to TikTok Instagram and YouTube
-If the video duration is long, it will automatically split the video into multiple videos and upload them all
-# Requirements  
-1. ffmpeg - https://ffmpeg.org/download.html 
-2. requirements.txt - `pip install -r requirements.txt `
-3. YouTube Client Secret - To use the YouTube API to upload a video, you will need to obtain a client secret file that contains the necessary authentication information. Here are the steps to obtain a client secret file:
+# Multi-video Upload Helper
 
-    1. Go to the Google Cloud Console (https://console.cloud.google.com/).
-    1. Click the "Select a project" dropdown menu and create a new project or 1. select an existing project.
-    1. Click the "APIs & Services" menu and then click the "Library" link.
-    1. Search for the "YouTube Data API" and click on the API to open the details page.
-    1. Click the "Enable" button to enable the API.
-    1. Click the "Credentials" menu and then click the "Create credentials" button.
-    1. Select "OAuth client ID" as the type of credential to create.
-    1. Select "Web application" as the application type.
-    1. Enter a name for the client and specify the authorized redirect URIs.
-    1. Click the "Create" button to create the client ID.
-    1. Click the "Download JSON" button to download the client secret file.
+This is a script for uploading videos to YouTube, Instagram, and TikTok. It can automatically split videos into parts if they exceed the maximum duration allowed by Instagram and TikTok. Additionally, you can provide tags for the video.
+
+## Prerequisites
+
+Before using this script, ensure that you have the following prerequisites in place:
+
+1. **YouTube API Credentials**:
+   - You need to set up API credentials for YouTube. Here's how to do it:
+     - Go to the [Google Developers Console](https://console.developers.google.com/).
+     - Create a new project or select an existing project.
+     - Enable the YouTube Data API v3 for your project.
+     - Create credentials for your project and download the client secret file (usually named `client_secret.json`).
+     - Place the `client_secret.json` file in the same directory as the script.
+
+2. **Instagram API Credentials**:
+   - For Instagram, you'll need your Instagram username and password.
+   - Ensure that your Instagram account is active and has permission to post videos.
+
+3. **TikTok API Credentials**:
+   - For TikTok, you'll need your TikTok username and password.
+   - Ensure that your TikTok account is active and has permission to post videos.
+
+4. **Python Dependencies**:
+   - Install the required Python libraries by running the following command in your terminal:
+     ```bash
+     pip install -r requirements.txt
+     ```
 
 ## Usage
 
-To use this script, you can simply run it from the command line with the following arguments:
+You can use the provided shell script to run the Python script with the necessary arguments. Here's how to use it:
 
-```
-./upload_video.sh path/to/video.mp4 3600 client_secret.json instagram_username instagram_password tiktok_username tiktok_password video_title video_description
+```bash
+./upload_video.sh <video_file_path> <max_video_duration> <client_secret_file> <scopes> <api_service_name> <api_version> <instagram_username> <instagram_password> <tiktok_username> <tiktok_password> <video_title> <video_description> [tag_file_path]
 ```
 
-This will upload the video located at `path/to/video.mp4` to YouTube, Instagram, and TikTok. If the video duration is more than 3600 seconds (1 hour), it will be split into multiple videos before uploading. The script will use the specified client secret file, Instagram username and password, and TikTok username and password to authenticate the API requests.
+- `<video_file_path>`: Path to the video file you want to upload.
+- `<max_video_duration>`: Maximum video duration allowed for Instagram and TikTok. The script will automatically split the video if it exceeds this duration.
+- `<client_secret_file>`: Path to your YouTube API client secret file (`client_secret.json`).
+- `<scopes>`: YouTube API scopes (e.g., `'https://www.googleapis.com/auth/youtube.upload'`).
+- `<api_service_name>`: Name of the YouTube API service (e.g., `'youtube'`).
+- `<api_version>`: YouTube API version (e.g., `'v3'`).
+- `<instagram_username>`: Your Instagram username.
+- `<instagram_password>`: Your Instagram password.
+- `<tiktok_username>`: Your TikTok username.
+- `<tiktok_password>`: Your TikTok password.
+- `<video_title>`: Title for the uploaded video.
+- `<video_description>`: Description for the uploaded video.
+- `[tag_file_path]` (optional): Path to a file containing tags for the video (one tag per line). If not provided, tags will be omitted.
+
+## Example Usage
+
+```bash
+./upload_video.sh my_video.mp4 60 client_secret.json 'https://www.googleapis.com/auth/youtube.upload' youtube v3 my_instagram_user my_instagram_pass my_tiktok_user my_tiktok_pass 'My Video Title' 'My Video Description' tags.txt
+```
+
+In this example, the script will upload `my_video.mp4` to YouTube, automatically split it into parts if needed, and upload it to Instagram and TikTok. The video title, description, and tags are provided, and tags are read from the `tags.txt` file.
+
+Feel free to customize the script's parameters and use it to upload your videos to multiple platforms easily.

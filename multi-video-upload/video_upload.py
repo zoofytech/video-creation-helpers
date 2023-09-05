@@ -1,48 +1,49 @@
 #!/usr/bin/env python3
+
 import os
 import sys
 import subprocess
-
-# Import the necessary libraries for uploading to YouTube, Instagram, and TikTok
+import moviepy.editor as mp
 import google.auth
 import googleapiclient.discovery
 import googleapiclient.errors
 import instagram_private_api
 import pytiktok
+from googleapiclient.http import MediaFileUpload
 
 def main():
     # Get the arguments passed by the shell wrapper script
     video_file_path = sys.argv[1]
-    MAX_VIDEO_DURATION = int(sys.argv[2])
-    client_secret_file = sys.argv[3]
-    scopes = sys.argv[4]
-    api_service_name = sys.argv[5]
-    api_version = sys.argv[6]
-    instagram_username = sys.argv[7]
-    instagram_password = sys.argv[8]
-    tiktok_username = sys.argv[9]
-    tiktok_password = sys.argv[10]
-    video_title = sys.argv[11]
-    video_description = sys.argv[12]
+    client_secret_file = sys.argv[2]
+    scopes = sys.argv[3]
+    api_service_name = sys.argv[4]
+    api_version = sys.argv[5]
+    username_instagram = sys.argv[6]
+    password_instagram = sys.argv[7]
+    username_tiktok = sys.argv[8]
+    password_tiktok = sys.argv[9]
+    video_title = sys.argv[10]
+    video_description = sys.argv[11]
     
     # Check the video duration
     video_duration = get_video_duration(video_file_path)
 
     # Split the video into multiple videos if necessary
-    if video_duration > MAX_VIDEO_DURATION:
-        split_video(video_file_path)
+    max_video_duration = int(sys.argv[12])
+    if video_duration > max_video_duration:
+        split_video(video_file_path, max_video_duration)
 
     # Upload the video to YouTube
-    youtube_upload(video_file_path, client_secret_file, scopes, api_service_name, api_version)
+    youtube_upload(video_file_path, client_secret_file, scopes, api_service_name, api_version, video_title, video_description)
 
     # Upload the video to Instagram
-    instagram_upload(video_file_path, instagram_username, instagram_password)
+    instagram_upload(video_file_path, username_instagram, password_instagram)
 
     # Upload the video to TikTok
-    tiktok_upload(video_file_path, tiktok_username, tiktok_password)
+    tiktok_upload(video_file_path, username_tiktok, password_tiktok)
 
 def get_video_duration(video_file_path):
-    # Use ffmpeg to get the duration of the video in seconds
+    # Use FFmpeg to get the duration of the video in seconds
     command = ['ffmpeg', '-i', video_file_path]
     output = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = output.stderr.decode()
@@ -54,22 +55,19 @@ def get_video_duration(video_file_path):
             break
     return duration
 
-def split_video(video_file_path):
-    # Use ffmpeg to split the video into multiple videos
-    video_duration = get_video_duration(video_file_path)
-    MAX_VIDEO_DURATION = 10
-    num_videos = int(video_duration / MAX_VIDEO_DURATION) + 1
+def split_video(video_file_path, max_duration):
+    # Use moviepy to split the video into multiple videos
+    video = mp.VideoFileClip(video_file_path)
+    num_videos = int(video.duration // max_duration) + 1
     for i in range(num_videos):
-        start_time = i * MAX_VIDEO_DURATION
-        end_time = start_time + MAX_VIDEO_DURATION
-        out_file = f'{video_file_path}_part_{i}.mp4'
-        command = ['ffmpeg', '-i', video_file_path, '-ss', start_time, '-to', end_time, '-c', 'copy', out_file]
-        subprocess.run(command)
-    pass
+        start_time = i * max_duration
+        end_time = min((i + 1) * max_duration, video.duration)
+        subclip = video.subclip(start_time, end_time)
+        subclip.write_videofile(f'{video_file_path}_part_{i}.mp4', codec="libx264", fps=24)
 
 def youtube_upload(video_file_path, client_secret_file, scopes, api_service_name, api_version, video_title, video_description):
     # Load the client secrets file
-    creds = google.oauth2.credentials.Credentials.from_authorized_user_info(info=client_secret_file, scopes=scopes)
+    creds = google.auth.credentials.Credentials.from_authorized_user_info(info=client_secret_file, scopes=scopes)
 
     # Create the YouTube API client
     youtube = googleapiclient.discovery.build(api_service_name, api_version, credentials=creds)
@@ -101,19 +99,18 @@ def youtube_upload(video_file_path, client_secret_file, scopes, api_service_name
             print(f'Uploaded {int(status.progress() * video_size)} bytes')
     print(f'Video uploaded: {response["id"]}')
 
-
-def instagram_upload(video_file_path, instagram_username, instagram_password):
+def instagram_upload(video_file_path, username, password):
     # Create an Instagram API client
-    api = instagram_private_api.Client(instagram_username, instagram_password)
+    api = instagram_private_api.Client(username, password)
 
     # Read the video file and upload it to Instagram
     with open(video_file_path, 'rb') as file:
         api.upload_video(file, caption='Video Caption')
         print('Video uploaded to Instagram')
 
-def tiktok_upload(video_file_path, tiktok_username, tiktok_password):
+def tiktok_upload(video_file_path, username, password):
     # Create a TikTok API client
-    api = pytiktok.Client(tiktok_username, tiktok_password)
+    api = pytiktok.Client(username, password)
 
     # Read the video file and upload it to TikTok
     with open(video_file_path, 'rb') as file:
@@ -122,5 +119,3 @@ def tiktok_upload(video_file_path, tiktok_username, tiktok_password):
 
 if __name__ == '__main__':
     main()
-
-
