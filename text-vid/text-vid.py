@@ -1,47 +1,58 @@
-#!/usr/bin/env python3
 import argparse
+from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, concatenate_videoclips
 from pydub import AudioSegment
-from moviepy.editor import VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip
+import textwrap
 
-class TextInserter:
-  def __init__(self, video_file, transcript_file, output_file):
-    # Open the video file and extract the audio
-    self.video = VideoFileClip(video_file)
-    self.audio = self.video.audio
+# Define a function to parse command line arguments
+def parse_args():
+    parser = argparse.ArgumentParser(description="Generate a video with subtitles.")
+    parser.add_argument("--audio", type=str, required=True, help="Input audio file (e.g., sample_audio.mp3)")
+    parser.add_argument("--textfile", type=str, required=True, help="Text file containing subtitles content")
+    parser.add_argument("--intro", type=str, required=True, help="Intro video file")
+    parser.add_argument("--outro", type=str, required=True, help="Outro video file")
+    return parser.parse_args()
 
-    # Get the duration of the audio
-    self.duration = self.audio.duration
+# Parse command line arguments
+args = parse_args()
 
-    # Create a list to store the text clips
-    self.text_clips = []
+# Load the audio file and get its duration
+audio = AudioSegment.from_file(args.audio)
+audio_duration = len(audio) / 1000  # Convert milliseconds to seconds
 
-    # Open the transcript file and iterate through the lines
-    with open(transcript_file) as f:
-      for line in f:
-        start, end, text = line.strip().split("\t")
-        start_time = int(start) / 1000
-        end_time = int(end) / 1000
-        text_clip = TextClip(text, fontsize=24, color='white', bg_color='black').set_duration(end_time - start_time)
-        text_clip = text_clip.set_pos('center').set_start(start_time)
-        self.text_clips.append(text_clip)
+# Read the text content from the specified file
+with open(args.textfile, 'r') as text_file:
+    text_content = text_file.read()
 
-    # Set the output file
-    self.output_file = output_file
+# Split the text into sentences
+sentences = textwrap.wrap(text_content, width=50)  # Adjust the width as needed
 
-  def insert_text(self):
-    # Combine the text clips, audio, and video
-    final_clip = CompositeVideoClip(self.text_clips + [self.video.set_audio(self.audio)])
+# Create a function to generate subtitles as video frames
+def create_subtitles(t):
+    current_sentence = sentences[min(int(t), len(sentences) - 1)]
+    text_clip = TextClip(current_sentence, fontsize=36, color='white')
+    
+    # Add a black background for the text
+    text_clip = text_clip.on_color(size=(1920, 1080), color=(0, 0, 0), col_opacity=1)
+    
+    text_clip = text_clip.set_duration(2)  # Display each sentence for 2 seconds
+    text_clip = text_clip.set_position(('center', 'bottom'))
+    text_clip = text_clip.set_start(t)
+    return text_clip
 
-    # Write the final video to a file
-    final_clip.write_videofile(self.output_file)
+# Create an empty video with a black background and the same duration as the audio in 1080p resolution
+video = VideoFileClip("empty_black_background_1080p.mp4").set_duration(audio_duration).resize(height=1080)
 
-# Add command-line arguments
-parser = argparse.ArgumentParser()
-parser.add_argument("video_file", help="path to the input video file")
-parser.add_argument("transcript_file", help="path to the transcript file")
-parser.add_argument("output_file", help="path to the output video file")
-args = parser.parse_args()
+# Generate subtitles for the entire duration of the audio
+subtitles = [create_subtitles(t) for t in range(0, int(audio_duration), 2)]
 
-# Create a TextInserter object and insert the text
-inserter = TextInserter(args.video_file, args.transcript_file, args.output_file)
-inserter.insert_text()
+# Concatenate the intro video, subtitles, and outro video
+intro_video = VideoFileClip(args.intro)
+outro_video = VideoFileClip(args.outro)
+
+final_video = concatenate_videoclips([intro_video, video] + subtitles + [outro_video])
+
+# Set the audio of the final video
+final_video = final_video.set_audio(audio)
+
+# Write the final video to a file
+final_video.write_videofile("output_video_with_intro_outro_black_background.mp4", codec='libx264', fps=24)
