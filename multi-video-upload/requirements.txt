@@ -1,7 +1,6 @@
-google-auth==2.23.0
-google-auth-oauthlib==0.4.1
-google-auth-httplib2==0.0.3
-google-api-python-client==1.12.5
-instagram-private-api==2.3.0
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+instagram-api-python
 pytiktok
-moviepy==1.0.3

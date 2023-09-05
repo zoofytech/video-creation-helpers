@@ -1,61 +1,89 @@
 # Multi-video Upload Helper
 
-This is a script for uploading videos to YouTube, Instagram, and TikTok. It can automatically split videos into parts if they exceed the maximum duration allowed by Instagram and TikTok. Additionally, you can provide tags for the video.
+This project provides a set of scripts to simplify the process of uploading videos to YouTube, Instagram, and TikTok. It also handles video splitting if the duration exceeds the maximum allowed by Instagram and TikTok (60 seconds).
 
 ## Prerequisites
 
-Before using this script, ensure that you have the following prerequisites in place:
+Before using these scripts, ensure you have the following:
 
-1. **YouTube API Credentials**:
-   - You need to set up API credentials for YouTube. Here's how to do it:
-     - Go to the [Google Developers Console](https://console.developers.google.com/).
-     - Create a new project or select an existing project.
-     - Enable the YouTube Data API v3 for your project.
-     - Create credentials for your project and download the client secret file (usually named `client_secret.json`).
-     - Place the `client_secret.json` file in the same directory as the script.
+1. **Python and Pip**: You need Python 3 and Pip installed. You can download Python from the official [Python website](https://www.python.org/downloads/). Pip usually comes pre-installed with Python.
 
-2. **Instagram API Credentials**:
-   - For Instagram, you'll need your Instagram username and password.
-   - Ensure that your Instagram account is active and has permission to post videos.
+2. **FFmpeg**: FFmpeg is required for video duration calculations and splitting. You can download it from the [FFmpeg website](https://www.ffmpeg.org/download.html) and follow the installation instructions for your operating system.
 
-3. **TikTok API Credentials**:
-   - For TikTok, you'll need your TikTok username and password.
-   - Ensure that your TikTok account is active and has permission to post videos.
+3. **YouTube API Credentials**: To upload videos to YouTube, you need to set up API credentials in a `client_secret.json` file. Follow these steps to create your API project and obtain the credentials:
+    - Go to the [Google Developers Console](https://console.developers.google.com/).
+    - Create a new project or select an existing one.
+    - In the left sidebar, navigate to **APIs & Services > Credentials**.
+    - Click on **Create Credentials > OAuth client ID**.
+    - Choose "Other" as the application type.
+    - Download the credentials JSON file and save it as `client_secret.json` in the project directory.
 
-4. **Python Dependencies**:
-   - Install the required Python libraries by running the following command in your terminal:
-     ```bash
-     pip install -r requirements.txt
-     ```
+4. **Instagram and TikTok API Credentials**: You need to set up API credentials for Instagram and TikTok. Please follow the respective platform's documentation to obtain these credentials.
+
+5. **Tags (Optional)**: If you want to include tags with your videos, create a file named `tags.txt` in the project directory. Each line in the file should contain a tag.
+
+## Installation
+
+1. Clone this repository to your local machine:
+
+   ```bash
+   git clone https://github.com/yourusername/video-upload-helpers.git
+   cd video-upload-helpers
+   ```
+
+2. Install the required Python packages using Pip:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ## Usage
 
-You can use the provided shell script to run the Python script with the necessary arguments. Here's how to use it:
+- **Upload a Video**:
 
-```bash
-./upload_video.sh <video_file_path> <max_video_duration> <client_secret_file> <scopes> <api_service_name> <api_version> <instagram_username> <instagram_password> <tiktok_username> <tiktok_password> <video_title> <video_description> [tag_file_path]
-```
+  ```bash
+  ./upload_video.sh path/to/your/video.mp4
+  ```
 
-- `<video_file_path>`: Path to the video file you want to upload.
-- `<max_video_duration>`: Maximum video duration allowed for Instagram and TikTok. The script will automatically split the video if it exceeds this duration.
-- `<client_secret_file>`: Path to your YouTube API client secret file (`client_secret.json`).
-- `<scopes>`: YouTube API scopes (e.g., `'https://www.googleapis.com/auth/youtube.upload'`).
-- `<api_service_name>`: Name of the YouTube API service (e.g., `'youtube'`).
-- `<api_version>`: YouTube API version (e.g., `'v3'`).
-- `<instagram_username>`: Your Instagram username.
-- `<instagram_password>`: Your Instagram password.
-- `<tiktok_username>`: Your TikTok username.
-- `<tiktok_password>`: Your TikTok password.
-- `<video_title>`: Title for the uploaded video.
-- `<video_description>`: Description for the uploaded video.
-- `[tag_file_path]` (optional): Path to a file containing tags for the video (one tag per line). If not provided, tags will be omitted.
+  - Replace `path/to/your/video.mp4` with the path to your video file.
+  - The script will automatically split the video if it exceeds 60 seconds for Instagram and TikTok.
 
-## Example Usage
+- **Upload a Video with Tags (Optional)**:
 
-```bash
-./upload_video.sh my_video.mp4 60 client_secret.json 'https://www.googleapis.com/auth/youtube.upload' youtube v3 my_instagram_user my_instagram_pass my_tiktok_user my_tiktok_pass 'My Video Title' 'My Video Description' tags.txt
-```
+  Create a file named `tags.txt` in the project directory. Each line should contain a tag.
 
-In this example, the script will upload `my_video.mp4` to YouTube, automatically split it into parts if needed, and upload it to Instagram and TikTok. The video title, description, and tags are provided, and tags are read from the `tags.txt` file.
+  ```bash
+  ./upload_video.sh path/to/your/video.mp4
+  ```
 
-Feel free to customize the script's parameters and use it to upload your videos to multiple platforms easily.
+  - Replace `path/to/your/video.mp4` with the path to your video file.
+  - The script will automatically split the video if it exceeds 60 seconds for Instagram and TikTok.
+  - Tags will be read from the `tags.txt` file.
+
+## Examples
+
+Here are some examples of how to use the scripts:
+
+1. Upload a video to YouTube:
+
+   ```bash
+   ./upload_video.sh path/to/your/video.mp4
+   ```
+
+2. Upload a video to Instagram and TikTok:
+
+   ```bash
+   ./upload_video.sh path/to/your/video.mp4
+   ```
+
+3. Upload a video with tags to Instagram and TikTok:
+
+   ```bash
+   ./upload_video.sh path/to/your/video.mp4
+   ```
+
+   - Make sure to have a `tags.txt` file with tags in the project directory.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
